@@ -7,12 +7,16 @@ import { useChatStore } from "./store/useChatStore";
 import { useEffect } from "react";
 import PageLoader from "./components/PageLoader";
 import { NotificationContainer } from "./components/PremiumNotifications";
+import { useThemeApplication } from "./hooks/useThemeApplication";
 
 import { Toaster } from "react-hot-toast";
 
 function App() {
   const { checkAuth, isCheckingAuth, authUser } = useAuthStore();
   const { getTotalUnreadCount } = useChatStore();
+  
+  // Apply theme automatically
+  useThemeApplication();
 
   useEffect(() => {
     checkAuth();

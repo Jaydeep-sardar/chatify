@@ -13,10 +13,10 @@ function ChatPage() {
   const { activeTab, selectedUser } = useChatStore();
 
   return (
-    <div className="relative w-full max-w-7xl h-[850px] mx-auto">
+    <div className="relative w-full max-w-7xl h-[900px] mx-auto">
       <BorderAnimatedContainer>
-        {/* LEFT SIDE - Enhanced with better styling */}
-        <div className="w-80 bg-gradient-to-b from-slate-800/60 to-slate-900/60 backdrop-blur-md flex flex-col border-r border-slate-700/50">
+        {/* LEFT SIDEBAR - Premium Design */}
+        <div className="w-80 glass-effect flex flex-col border-r border-slate-600/30 shadow-2xl">
           <div className="animate-fade-in-up">
             <ProfileHeader />
           </div>
@@ -25,11 +25,11 @@ function ChatPage() {
             <ActiveTabSwitch />
           </div>
 
-          <div className="px-4 animate-fade-in-up" style={{animationDelay: '0.15s'}}>
+          <div className="px-4 pb-3 animate-fade-in-up" style={{animationDelay: '0.15s'}}>
             <NotificationSettings />
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-2 scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-transparent">
+          <div className="flex-1 overflow-y-auto px-4 pb-4 space-y-3 scrollbar-premium">
             <div className="animate-fade-in-up" style={{animationDelay: '0.2s'}}>
               {activeTab === "chats" ? <ChatsList /> : <ContactList />}
             </div>
@@ -37,10 +37,17 @@ function ChatPage() {
         </div>
 
         {/* RIGHT SIDE - Enhanced with animations */}
-        <div className="flex-1 flex flex-col bg-gradient-to-b from-slate-900/40 to-slate-800/40 backdrop-blur-md relative overflow-hidden">
-          {/* Subtle background pattern */}
-          <div className="absolute inset-0 opacity-[0.02]">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(6,182,212,0.1),transparent_70%)]" />
+        <div className="flex-1 flex flex-col glass-strong relative overflow-hidden">
+          {/* Enhanced background effects */}
+          <div className="absolute inset-0 opacity-[0.03]">
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(6,182,212,0.15),transparent_50%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(139,92,246,0.1),transparent_50%)]" />
+          </div>
+          
+          {/* Subtle animated particles */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-cyan-400/20 rounded-full animate-ping" style={{animationDelay: '2s'}} />
+            <div className="absolute top-3/4 right-1/4 w-1 h-1 bg-blue-400/30 rounded-full animate-pulse" style={{animationDelay: '4s'}} />
           </div>
           
           <div className="relative z-10 flex-1 flex flex-col">

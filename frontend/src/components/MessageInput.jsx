@@ -45,7 +45,7 @@ function MessageInput() {
   };
 
   return (
-    <div className="p-6 border-t border-slate-700/50 bg-gradient-to-t from-slate-800/30 to-transparent backdrop-blur-sm">
+    <div className="p-6 border-t border-slate-600/30 glass-effect">
       {imagePreview && (
         <div className="max-w-4xl mx-auto mb-4 animate-fade-in-up">
           <div className="relative inline-block">
@@ -67,27 +67,40 @@ function MessageInput() {
       )}
 
       <form onSubmit={handleSendMessage} className="max-w-4xl mx-auto">
-        <div className="flex items-end space-x-4 p-3 bg-slate-800/40 rounded-2xl border border-slate-700/30 backdrop-blur-sm shadow-xl">
-          {/* Message Input */}
+        <div className="flex items-end space-x-4 p-4 glass-strong rounded-2xl shadow-2xl">
+          {/* Enhanced Message Input */}
           <div className="flex-1 relative group">
-            <input
-              type="text"
+            <textarea
               value={text}
               onChange={(e) => {
                 setText(e.target.value);
                 isSoundEnabled && playRandomKeyStrokeSound();
               }}
-              className="w-full bg-slate-700/50 border border-slate-600/50 rounded-xl py-3 px-4 text-slate-200 placeholder-slate-400 
-                         focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 focus:bg-slate-700/70
+              className="w-full bg-slate-800/60 border border-slate-600/40 rounded-xl py-4 px-6 text-slate-200 placeholder-slate-400 
+                         focus:ring-2 focus:ring-cyan-400/50 focus:border-cyan-400/50 focus:bg-slate-800/80
                          transition-all duration-300 ease-in-out
-                         hover:border-slate-500/70 hover:bg-slate-700/60
-                         resize-none max-h-32 min-h-[3rem]"
-              placeholder="Type your message..."
+                         hover:border-slate-500/60 hover:bg-slate-800/70 hover:shadow-glow
+                         resize-none max-h-32 min-h-[3.5rem] scrollbar-premium
+                         backdrop-blur-sm"
+              placeholder="Type your message... ✨"
               rows="1"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage(e);
+                }
+              }}
             />
-            {/* Typing indicator line */}
-            <div className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-cyan-400 to-blue-400 transition-all duration-300 ease-out"
-                 style={{width: text.length > 0 ? '100%' : '0%'}} />
+            
+            {/* Enhanced typing indicator */}
+            <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 rounded-full transition-all duration-500 ease-out transform scale-x-0 group-focus-within:scale-x-100 origin-left" />
+            
+            {/* Character count indicator */}
+            {text.length > 50 && (
+              <div className="absolute -bottom-6 right-2 text-xs text-slate-500">
+                {text.length}/1000
+              </div>
+            )}
           </div>
 
           <input
@@ -98,30 +111,31 @@ function MessageInput() {
             className="hidden"
           />
 
-          {/* Image Upload Button */}
+          {/* Premium Image Upload Button */}
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className={`p-3 rounded-xl transition-all duration-300 ease-in-out hover:scale-110 active:scale-95 ${
+            className={`p-3 rounded-xl transition-all duration-300 ease-out hover:scale-110 active:scale-95 interactive-hover ${
               imagePreview 
-                ? "bg-gradient-to-r from-cyan-500/20 to-blue-500/20 text-cyan-400 border border-cyan-500/30 shadow-lg shadow-cyan-500/20" 
-                : "bg-slate-700/50 text-slate-400 hover:text-slate-200 hover:bg-slate-700/70 border border-slate-600/50"
+                ? "bg-gradient-to-r from-cyan-500/30 to-blue-500/30 text-cyan-300 border border-cyan-400/50 shadow-glow" 
+                : "bg-slate-700/40 text-slate-400 hover:text-slate-200 hover:bg-slate-600/50 border border-slate-600/40"
             }`}
+            title="Upload image"
           >
-            <ImageIcon className={`w-5 h-5 transition-transform duration-300 ${imagePreview ? 'scale-110' : ''}`} />
+            <ImageIcon className={`w-5 h-5 transition-all duration-300 ${imagePreview ? 'scale-110 animate-pulse' : ''}`} />
           </button>
 
-          {/* Send Button */}
+          {/* Premium Send Button */}
           <button
             type="submit"
             disabled={!text.trim() && !imagePreview}
-            className="p-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl font-medium 
-                       hover:from-cyan-600 hover:to-blue-600 hover:scale-110 active:scale-95
+            className="p-4 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-xl font-semibold 
+                       hover:from-cyan-400 hover:to-blue-400 hover:scale-110 active:scale-95
                        focus:ring-2 focus:ring-cyan-400/50 focus:ring-offset-2 focus:ring-offset-slate-800
-                       transition-all duration-300 ease-in-out
+                       transition-all duration-300 ease-out
                        disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100
-                       shadow-lg shadow-cyan-500/25 hover:shadow-xl hover:shadow-cyan-500/30
-                       relative overflow-hidden group"
+                       shadow-glow hover:shadow-glow-strong
+                       relative overflow-hidden group interactive-hover"
           >
             <SendIcon className="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:translate-x-0.5" />
             {/* Hover effect */}

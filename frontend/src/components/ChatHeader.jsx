@@ -2,6 +2,8 @@ import { XIcon } from "lucide-react";
 import { useChatStore } from "../store/useChatStore";
 import { useEffect } from "react";
 import { useAuthStore } from "../store/useAuthStore";
+import CallControls from "./CallControls";
+import ThemeToggle from "./ThemeToggle";
 
 function ChatHeader() {
   const { selectedUser, setSelectedUser, messages } = useChatStore();
@@ -15,8 +17,6 @@ function ChatHeader() {
     };
 
     window.addEventListener("keydown", handleEscKey);
-
-    // cleanup function
     return () => window.removeEventListener("keydown", handleEscKey);
   }, [setSelectedUser]);
 
@@ -58,13 +58,16 @@ function ChatHeader() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-3">
         {isOnline && (
           <div className="hidden sm:flex items-center gap-1 px-3 py-1 bg-green-500/20 rounded-full border border-green-500/30">
             <div className="w-2 h-2 bg-green-400 rounded-full animate-ping"></div>
             <span className="text-green-400 text-xs font-medium">Active now</span>
           </div>
         )}
+        
+        <CallControls />
+        <ThemeToggle />
         
         <button 
           onClick={() => setSelectedUser(null)}
@@ -77,4 +80,5 @@ function ChatHeader() {
     </div>
   );
 }
+
 export default ChatHeader;
