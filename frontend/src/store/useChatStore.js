@@ -12,14 +12,44 @@ export const useChatStore = create((set, get) => ({
   isUsersLoading: false,
   isMessagesLoading: false,
   isSoundEnabled: JSON.parse(localStorage.getItem("isSoundEnabled")) === true,
+  unreadCounts: {}, // { userId: count }
+  notifications: JSON.parse(localStorage.getItem("notifications")) || true,
 
   toggleSound: () => {
     localStorage.setItem("isSoundEnabled", !get().isSoundEnabled);
     set({ isSoundEnabled: !get().isSoundEnabled });
   },
 
+  toggleNotifications: () => {
+    const newNotificationState = !get().notifications;
+    localStorage.setItem("notifications", JSON.stringify(newNotificationState));
+    set({ notifications: newNotificationState });
+  },
+
+  markAsRead: (userId) => {
+    const { unreadCounts } = get();
+    const updatedCounts = { ...unreadCounts };
+    delete updatedCounts[userId];
+    set({ unreadCounts: updatedCounts });
+  },
+
+  incrementUnreadCount: (userId) => {
+    const { unreadCounts } = get();
+    set({ 
+      unreadCounts: { 
+        ...unreadCounts, 
+        [userId]: (unreadCounts[userId] || 0) + 1 
+      } 
+    });
+  },
+
   setActiveTab: (tab) => set({ activeTab: tab }),
-  setSelectedUser: (selectedUser) => set({ selectedUser }),
+  setSelectedUser: (selectedUser) => {
+    set({ selectedUser });
+    if (selectedUser) {
+      get().markAsRead(selectedUser._id);
+    }
+  },
 
   getAllContacts: async () => {
     set({ isUsersLoading: true });
@@ -85,23 +115,45 @@ export const useChatStore = create((set, get) => ({
   },
 
   subscribeToMessages: () => {
-    const { selectedUser, isSoundEnabled } = get();
-    if (!selectedUser) return;
-
     const socket = useAuthStore.getState().socket;
 
     socket.on("newMessage", (newMessage) => {
-      const isMessageSentFromSelectedUser = newMessage.senderId === selectedUser._id;
-      if (!isMessageSentFromSelectedUser) return;
+      const { selectedUser, isSoundEnabled, notifications } = get();
+      const { authUser } = useAuthStore.getState();
+      
+      // Don't process own messages
+      if (newMessage.senderId === authUser._id) return;
 
-      const currentMessages = get().messages;
-      set({ messages: [...currentMessages, newMessage] });
+      const isMessageFromSelectedUser = selectedUser && newMessage.senderId === selectedUser._id;
+      
+      if (isMessageFromSelectedUser) {
+        // If chat is open, add message directly
+        const currentMessages = get().messages;
+        set({ messages: [...currentMessages, newMessage] });
+      } else {
+        // If chat is not open, increment unread count
+        get().incrementUnreadCount(newMessage.senderId);
+      }
 
+      // Play notification sound
       if (isSoundEnabled) {
         const notificationSound = new Audio("/sounds/notification.mp3");
-
-        notificationSound.currentTime = 0; // reset to start
+        notificationSound.currentTime = 0;
         notificationSound.play().catch((e) => console.log("Audio play failed:", e));
+      }
+
+      // Show browser notification
+      if (notifications && !isMessageFromSelectedUser) {
+        const sender = get().allContacts.find(contact => contact._id === newMessage.senderId) ||
+                      get().chats.find(chat => chat._id === newMessage.senderId);
+        
+        if (sender && 'Notification' in window && Notification.permission === 'granted') {
+          new Notification(`New message from ${sender.fullName}`, {
+            body: newMessage.text || 'Sent an image',
+            icon: sender.profilePic || '/avatar.png',
+            tag: newMessage.senderId
+          });
+        }
       }
     });
   },
@@ -109,5 +161,18 @@ export const useChatStore = create((set, get) => ({
   unsubscribeFromMessages: () => {
     const socket = useAuthStore.getState().socket;
     socket.off("newMessage");
+  },
+
+  requestNotificationPermission: async () => {
+    if ('Notification' in window && Notification.permission === 'default') {
+      const permission = await Notification.requestPermission();
+      return permission === 'granted';
+    }
+    return Notification.permission === 'granted';
+  },
+
+  getTotalUnreadCount: () => {
+    const { unreadCounts } = get();
+    return Object.values(unreadCounts).reduce((total, count) => total + count, 0);
   },
 }));
