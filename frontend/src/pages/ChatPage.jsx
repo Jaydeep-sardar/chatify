@@ -1,4 +1,7 @@
 import { useChatStore } from "../store/useChatStore";
+import { useCallStore } from "../store/useCallStore";
+import { useEffect } from "react";
+import { useAuthStore } from "../store/useAuthStore";
 
 import BorderAnimatedContainer from "../components/BorderAnimatedContainer";
 import ProfileHeader from "../components/ProfileHeader";
@@ -8,9 +11,37 @@ import ContactList from "../components/ContactList";
 import ChatContainer from "../components/ChatContainer";
 import NoConversationPlaceholder from "../components/NoConversationPlaceholder";
 import NotificationSettings from "../components/NotificationSettings";
+import VoiceVideoCall from "../components/VoiceVideoCall";
 
 function ChatPage() {
   const { activeTab, selectedUser } = useChatStore();
+  const { socket } = useAuthStore();
+  const { 
+    handleIncomingCall, 
+    handleCallAnswered, 
+    handleCallEnded, 
+    handleCallRejected, 
+    handleIceCandidate 
+  } = useCallStore();
+
+  // Set up socket listeners for call events
+  useEffect(() => {
+    if (!socket) return;
+    
+    socket.on('incoming-call', handleIncomingCall);
+    socket.on('call-answered', handleCallAnswered);
+    socket.on('call-ended', handleCallEnded);
+    socket.on('call-rejected', handleCallRejected);
+    socket.on('ice-candidate', handleIceCandidate);
+
+    return () => {
+      socket.off('incoming-call', handleIncomingCall);
+      socket.off('call-answered', handleCallAnswered);
+      socket.off('call-ended', handleCallEnded);
+      socket.off('call-rejected', handleCallRejected);
+      socket.off('ice-candidate', handleIceCandidate);
+    };
+  }, [socket, handleIncomingCall, handleCallAnswered, handleCallEnded, handleCallRejected, handleIceCandidate]);
 
   return (
     <div className="relative w-full max-w-7xl h-[900px] mx-auto">
@@ -63,6 +94,9 @@ function ChatPage() {
           </div>
         </div>
       </BorderAnimatedContainer>
+      
+      {/* Voice/Video Call Interface */}
+      <VoiceVideoCall />
     </div>
   );
 }

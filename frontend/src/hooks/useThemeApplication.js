@@ -44,6 +44,15 @@ export function useThemeApplication() {
     };
 
     applyTheme();
+    
+    // Subscribe to theme changes
+    const unsubscribe = useThemeStore.subscribe((state, prevState) => {
+      if (state.currentTheme !== prevState.currentTheme) {
+        applyTheme();
+      }
+    });
+
+    return unsubscribe;
   }, [getCurrentTheme]);
 }
 

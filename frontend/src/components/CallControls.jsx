@@ -1,83 +1,41 @@
-import { useState } from 'react';
-import { Phone, Video, PhoneOff } from 'lucide-react';
+import { Phone, Video } from 'lucide-react';
 import { useChatStore } from '../store/useChatStore';
-import VoiceVideoCall from './VoiceVideoCall';
+import { useCallStore } from '../store/useCallStore';
 
-function CallControls({ user, isInChat = true }) {
-  const [activeCall, setActiveCall] = useState(null);
-  const [incomingCall, setIncomingCall] = useState(null);
-  
+function CallControls({ compact = false }) {
   const { selectedUser } = useChatStore();
-  const callUser = user || selectedUser;
+  const { initiateCall, isInCall } = useCallStore();
 
-  const initiateCall = (type) => {
-    if (!callUser) return;
-    
-    setActiveCall({
-      type,
-      user: callUser,
-      isOutgoing: true
-    });
-    
-    // In a real app, you'd send a socket event here
-    // socket.emit('initiate-call', { userId: callUser._id, type });
-  };
-
-  const handleCallEnd = () => {
-    setActiveCall(null);
-    setIncomingCall(null);
-  };
-
-  const handleCallAccept = () => {
-    if (incomingCall) {
-      setActiveCall(incomingCall);
-      setIncomingCall(null);
+  const handleVoiceCall = () => {
+    if (selectedUser && !isInCall) {
+      initiateCall(selectedUser._id, 'voice');
     }
   };
 
-  const handleCallDecline = () => {
-    setIncomingCall(null);
+  const handleVideoCall = () => {
+    if (selectedUser && !isInCall) {
+      initiateCall(selectedUser._id, 'video');
+    }
   };
 
-  if (activeCall) {
-    return (
-      <VoiceVideoCall
-        callType={activeCall.type}
-        isIncoming={false}
-        caller={activeCall.user}
-        onEnd={handleCallEnd}
-      />
-    );
-  }
+  if (!selectedUser) return null;
 
-  if (incomingCall) {
+  if (compact) {
     return (
-      <VoiceVideoCall
-        callType={incomingCall.type}
-        isIncoming={true}
-        caller={incomingCall.user}
-        onAccept={handleCallAccept}
-        onDecline={handleCallDecline}
-        onEnd={handleCallEnd}
-      />
-    );
-  }
-
-  if (!isInChat) {
-    // Compact version for chat list
-    return (
-      <div className="flex gap-2">
+      <div className="flex gap-1">
         <button
-          onClick={() => initiateCall('voice')}
-          className="p-1.5 bg-green-500/20 hover:bg-green-500/30 rounded-lg text-green-400 hover:text-green-300 transition-all duration-200 hover:scale-110"
+          onClick={handleVoiceCall}
+          disabled={isInCall}
+          className="p-1.5 rounded-lg hover:bg-slate-700/50 text-slate-400 hover:text-green-400 transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
           title="Voice call"
         >
           <Phone className="w-4 h-4" />
         </button>
         
         <button
-          onClick={() => initiateCall('video')}
-          className="p-1.5 bg-blue-500/20 hover:bg-blue-500/30 rounded-lg text-blue-400 hover:text-blue-300 transition-all duration-200 hover:scale-110"
+          onClick={handleVideoCall}
+          disabled={isInCall}
+          className="p-1.5 rounded-lg hover:bg-slate-700/50 text-slate-400 hover:text-blue-400 transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
           title="Video call"
         >
           <Video className="w-4 h-4" />
@@ -86,23 +44,36 @@ function CallControls({ user, isInChat = true }) {
     );
   }
 
-  // Full version for chat header
   return (
-    <div className="flex gap-3">
+    <div className="flex gap-2">
+      {/* Voice Call Button */}
       <button
-        onClick={() => initiateCall('voice')}
-        className="p-2.5 bg-green-500/20 hover:bg-green-500/30 rounded-xl text-green-400 hover:text-green-300 transition-all duration-300 hover:scale-110 interactive-hover"
+        onClick={handleVoiceCall}
+        disabled={isInCall}
+        className="group relative p-2 rounded-lg hover:bg-green-500/20 text-slate-400 hover:text-green-400 transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed border border-transparent hover:border-green-500/30"
         title="Start voice call"
       >
         <Phone className="w-5 h-5" />
+        
+        {/* Tooltip */}
+        <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+          Voice Call
+        </div>
       </button>
       
+      {/* Video Call Button */}
       <button
-        onClick={() => initiateCall('video')}
-        className="p-2.5 bg-blue-500/20 hover:bg-blue-500/30 rounded-xl text-blue-400 hover:text-blue-300 transition-all duration-300 hover:scale-110 interactive-hover"
+        onClick={handleVideoCall}
+        disabled={isInCall}
+        className="group relative p-2 rounded-lg hover:bg-blue-500/20 text-slate-400 hover:text-blue-400 transition-all duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed border border-transparent hover:border-blue-500/30"
         title="Start video call"
       >
         <Video className="w-5 h-5" />
+        
+        {/* Tooltip */}
+        <div className="absolute -bottom-8 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+          Video Call
+        </div>
       </button>
     </div>
   );
