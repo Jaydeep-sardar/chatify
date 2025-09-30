@@ -5,7 +5,8 @@ import ChatHeader from "./ChatHeader";
 import NoChatHistoryPlaceholder from "./NoChatHistoryPlaceholder";
 import MessageInput from "./MessageInput";
 import MessagesLoadingSkeleton from "./MessagesLoadingSkeleton";
-import MessageStatus from "./MessageStatus";
+import PremiumMessageBubble from "./PremiumMessageBubble";
+import { TypingIndicator } from "./PremiumUI";
 
 function ChatContainer() {
   const {
@@ -48,50 +49,48 @@ function ChatContainer() {
             
             {messages.map((msg, index) => {
               const isOwnMessage = msg.senderId === authUser._id;
-              const showAvatar = !isOwnMessage && (index === 0 || messages[index - 1].senderId !== msg.senderId);
               
               return (
                 <div
                   key={msg._id}
-                  className={`chat ${isOwnMessage ? "chat-end" : "chat-start"} animate-fade-in-up`}
+                  className={`flex ${isOwnMessage ? "justify-end" : "justify-start"} animate-message-pop`}
                   style={{animationDelay: `${index * 0.05}s`}}
                 >
-                  {showAvatar && (
-                    <div className="chat-image avatar">
-                      <div className="w-8 h-8 rounded-full">
-                        <img src={selectedUser.profilePic || "/avatar.png"} alt={selectedUser.fullName} />
-                      </div>
-                    </div>
-                  )}
-                  
-                  <div
-                    className={`chat-bubble relative shadow-lg transition-all duration-300 hover:scale-[1.02] ${
-                      isOwnMessage
-                        ? "bg-gradient-to-r from-cyan-600 to-cyan-500 text-white"
-                        : "bg-gradient-to-r from-slate-800 to-slate-700 text-slate-200 border border-slate-600/50"
-                    } ${msg.isOptimistic ? 'opacity-70' : ''}`}
-                  >
-                    {msg.image && (
-                      <div className="mb-2">
-                        <img 
-                          src={msg.image} 
-                          alt="Shared" 
-                          className="rounded-lg max-w-xs max-h-64 object-cover cursor-pointer hover:opacity-90 transition-opacity" 
-                          onClick={() => window.open(msg.image, '_blank')}
-                        />
-                      </div>
-                    )}
-                    {msg.text && (
-                      <p className="break-words leading-relaxed">{msg.text}</p>
-                    )}
-                    
-                    <div className="flex items-center justify-between mt-2 gap-2">
-                      <MessageStatus message={msg} isOwnMessage={isOwnMessage} />
-                    </div>
-                  </div>
+                  <PremiumMessageBubble
+                    message={msg}
+                    isOwnMessage={isOwnMessage}
+                    sender={selectedUser}
+                    onReaction={(messageId, emoji) => {
+                      // Handle reaction
+                      console.log('Reaction:', messageId, emoji);
+                    }}
+                    onShare={(message) => {
+                      // Handle share
+                      navigator.share?.({
+                        title: 'Shared from Chatify',
+                        text: message.text,
+                        url: window.location.href
+                      });
+                    }}
+                    onDownload={(imageUrl) => {
+                      // Handle download
+                      const a = document.createElement('a');
+                      a.href = imageUrl;
+                      a.download = 'image.jpg';
+                      a.click();
+                    }}
+                  />
                 </div>
               );
             })}
+            
+            {/* Typing Indicator */}
+            {/* You can add typing indicator here when someone is typing */}
+            {false && (
+              <div className="flex justify-start animate-fade-in-up">
+                <TypingIndicator users={[selectedUser.fullName]} />
+              </div>
+            )}
             {/* 👇 scroll target */}
             <div ref={messageEndRef} />
           </div>

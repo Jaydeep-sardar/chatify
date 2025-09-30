@@ -6,6 +6,7 @@ import { useAuthStore } from "./store/useAuthStore";
 import { useChatStore } from "./store/useChatStore";
 import { useEffect } from "react";
 import PageLoader from "./components/PageLoader";
+import { NotificationContainer } from "./components/PremiumNotifications";
 
 import { Toaster } from "react-hot-toast";
 
@@ -95,6 +96,9 @@ function App() {
           },
         }}
       />
+      
+      {/* Premium Notification System */}
+      <NotificationContainer />
     </div>
   );
 }
